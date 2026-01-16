@@ -1,276 +1,171 @@
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
-
-const scoreEl = document.getElementById("score");
-const ballsEl = document.getElementById("balls");
-const hudEl = document.getElementById("hud");
-const restartBtn = document.getElementById("restart");
-
-const state = {
-  score: 0,
-  balls: 3,
-  launched: false,
-  running: true,
-};
-
-const board = {
-  width: canvas.width,
-  height: canvas.height,
-  gravity: 0.25,
-  friction: 0.995,
-};
-
-const ball = {
-  x: board.width / 2,
-  y: board.height - 80,
-  radius: 10,
-  vx: 0,
-  vy: 0,
-};
-
-const flipperLeft = {
-  x: board.width / 2 - 90,
-  y: board.height - 90,
-  width: 90,
-  height: 16,
-  angle: -0.2,
-  active: false,
-};
-
-const flipperRight = {
-  x: board.width / 2 + 90,
-  y: board.height - 90,
-  width: 90,
-  height: 16,
-  angle: 0.2,
-  active: false,
-};
-
-const bumpers = [
-  { x: 120, y: 140, radius: 18, score: 50 },
-  { x: 300, y: 160, radius: 22, score: 75 },
-  { x: 210, y: 240, radius: 20, score: 60 },
-  { x: 150, y: 320, radius: 18, score: 40 },
-  { x: 280, y: 340, radius: 18, score: 40 },
+const products = [
+  {
+    id: 1,
+    name: "智能手表 Pro",
+    category: "tech",
+    price: 1299,
+    sales: "月销 2.3 万",
+    rating: "4.9",
+    image:
+      "https://images.unsplash.com/photo-1516574187841-cb9cc2ca948b?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    id: 2,
+    name: "高能蓝牙耳机",
+    category: "tech",
+    price: 599,
+    sales: "月销 1.7 万",
+    rating: "4.8",
+    image:
+      "https://images.unsplash.com/photo-1511379938547-c1f69419868d?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    id: 3,
+    name: "水润精华套装",
+    category: "beauty",
+    price: 399,
+    sales: "月销 9800+",
+    rating: "4.9",
+    image:
+      "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    id: 4,
+    name: "极简香氛蜡烛",
+    category: "home",
+    price: 169,
+    sales: "月销 6500+",
+    rating: "4.7",
+    image:
+      "https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    id: 5,
+    name: "软糯针织套装",
+    category: "fashion",
+    price: 459,
+    sales: "月销 1.2 万",
+    rating: "4.8",
+    image:
+      "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    id: 6,
+    name: "智能空气炸锅",
+    category: "home",
+    price: 899,
+    sales: "月销 8300+",
+    rating: "4.9",
+    image:
+      "https://images.unsplash.com/photo-1489515217757-5fd1be406fef?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    id: 7,
+    name: "小众设计师包",
+    category: "fashion",
+    price: 1280,
+    sales: "月销 5400+",
+    rating: "4.8",
+    image:
+      "https://images.unsplash.com/photo-1523359346063-d879354c0ea3?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    id: 8,
+    name: "高倍防晒乳",
+    category: "beauty",
+    price: 189,
+    sales: "月销 1.1 万",
+    rating: "4.7",
+    image:
+      "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=600&q=80",
+  },
 ];
 
-const walls = {
-  left: 18,
-  right: board.width - 18,
-  top: 18,
-};
+const productGrid = document.querySelector("#product-grid");
+const searchInput = document.querySelector("#search");
+const filterButtons = document.querySelectorAll(".chip");
+const cartCount = document.querySelector("#cart-count");
+const countdown = document.querySelector("#countdown");
 
-const keyState = {
-  left: false,
-  right: false,
-};
+let activeFilter = "all";
+let cartTotal = 0;
 
-function resetBall() {
-  ball.x = board.width / 2;
-  ball.y = board.height - 80;
-  ball.vx = 0;
-  ball.vy = 0;
-  state.launched = false;
-  showHud();
-}
+const formatPrice = (value) => `¥${value.toLocaleString()}`;
 
-function updateScore(points) {
-  state.score += points;
-  scoreEl.textContent = state.score;
-}
-
-function updateBalls() {
-  ballsEl.textContent = state.balls;
-}
-
-function showHud() {
-  hudEl.classList.remove("hidden");
-}
-
-function hideHud() {
-  hudEl.classList.add("hidden");
-}
-
-function launchBall() {
-  if (!state.launched && state.running) {
-    ball.vy = -7;
-    ball.vx = Math.random() * 2 - 1;
-    state.launched = true;
-    hideHud();
-  }
-}
-
-function circleCollision(bumper) {
-  const dx = ball.x - bumper.x;
-  const dy = ball.y - bumper.y;
-  const dist = Math.hypot(dx, dy);
-  if (dist < ball.radius + bumper.radius) {
-    const angle = Math.atan2(dy, dx);
-    const targetX = bumper.x + Math.cos(angle) * (ball.radius + bumper.radius);
-    const targetY = bumper.y + Math.sin(angle) * (ball.radius + bumper.radius);
-    ball.x = targetX;
-    ball.y = targetY;
-    const speed = Math.hypot(ball.vx, ball.vy) + 1.2;
-    ball.vx = Math.cos(angle) * speed;
-    ball.vy = Math.sin(angle) * speed;
-    updateScore(bumper.score);
-  }
-}
-
-function applyFlipper(flipper, direction) {
-  const dx = ball.x - flipper.x;
-  const dy = ball.y - flipper.y;
-  const dist = Math.hypot(dx, dy);
-  if (dist < flipper.width / 1.4 && dy > -12 && dy < 30) {
-    ball.vy = -Math.abs(ball.vy) - 4;
-    ball.vx += direction * 2.4;
-    updateScore(10);
-  }
-}
-
-function handleWalls() {
-  if (ball.x - ball.radius < walls.left) {
-    ball.x = walls.left + ball.radius;
-    ball.vx *= -0.9;
-  }
-  if (ball.x + ball.radius > walls.right) {
-    ball.x = walls.right - ball.radius;
-    ball.vx *= -0.9;
-  }
-  if (ball.y - ball.radius < walls.top) {
-    ball.y = walls.top + ball.radius;
-    ball.vy *= -0.9;
-  }
-}
-
-function updateFlippers() {
-  flipperLeft.active = keyState.left;
-  flipperRight.active = keyState.right;
-}
-
-function stepPhysics() {
-  if (!state.launched) {
-    return;
-  }
-
-  ball.vy += board.gravity;
-  ball.vx *= board.friction;
-  ball.vy *= board.friction;
-
-  ball.x += ball.vx;
-  ball.y += ball.vy;
-
-  handleWalls();
-  bumpers.forEach(circleCollision);
-
-  if (flipperLeft.active) {
-    applyFlipper(flipperLeft, -1);
-  }
-  if (flipperRight.active) {
-    applyFlipper(flipperRight, 1);
-  }
-
-  if (ball.y - ball.radius > board.height) {
-    state.balls -= 1;
-    updateBalls();
-    if (state.balls <= 0) {
-      state.running = false;
-      showHud();
-      hudEl.querySelector("p").textContent = "游戏结束，点击重新开始。";
-    } else {
-      resetBall();
-    }
-  }
-}
-
-function drawBoard() {
-  ctx.clearRect(0, 0, board.width, board.height);
-
-  const gradient = ctx.createLinearGradient(0, 0, 0, board.height);
-  gradient.addColorStop(0, "rgba(56, 189, 248, 0.08)");
-  gradient.addColorStop(1, "rgba(15, 23, 42, 0.0)");
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, board.width, board.height);
-
-  ctx.strokeStyle = "rgba(148, 163, 184, 0.4)";
-  ctx.lineWidth = 4;
-  ctx.beginPath();
-  ctx.moveTo(walls.left, walls.top);
-  ctx.lineTo(walls.left, board.height - 40);
-  ctx.moveTo(walls.right, walls.top);
-  ctx.lineTo(walls.right, board.height - 40);
-  ctx.stroke();
-
-  bumpers.forEach((bumper) => {
-    ctx.beginPath();
-    ctx.fillStyle = "rgba(251, 191, 36, 0.9)";
-    ctx.strokeStyle = "rgba(251, 191, 36, 0.4)";
-    ctx.lineWidth = 4;
-    ctx.arc(bumper.x, bumper.y, bumper.radius, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
+const renderProducts = () => {
+  const keyword = searchInput.value.trim();
+  const filtered = products.filter((product) => {
+    const matchesFilter =
+      activeFilter === "all" || product.category === activeFilter;
+    const matchesKeyword =
+      !keyword || product.name.includes(keyword) || product.sales.includes(keyword);
+    return matchesFilter && matchesKeyword;
   });
 
-  drawFlipper(flipperLeft, "#f472b6");
-  drawFlipper(flipperRight, "#60a5fa");
+  productGrid.innerHTML = filtered
+    .map(
+      (product) => `
+      <article class="product-card">
+        <img src="${product.image}" alt="${product.name}" />
+        <div class="product-content">
+          <div>
+            <h3>${product.name}</h3>
+            <div class="product-meta">
+              <span>${product.sales}</span>
+              <span>⭐ ${product.rating}</span>
+            </div>
+          </div>
+          <div class="price">${formatPrice(product.price)}</div>
+          <div class="product-actions">
+            <button class="outline" type="button">收藏</button>
+            <button class="primary" type="button" data-add="${product.id}">
+              加入购物车
+            </button>
+          </div>
+        </div>
+      </article>
+    `
+    )
+    .join("");
+};
 
-  ctx.beginPath();
-  ctx.fillStyle = "#e2e8f0";
-  ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-  ctx.fill();
-}
+const setActiveFilter = (value) => {
+  activeFilter = value;
+  filterButtons.forEach((button) => {
+    button.classList.toggle("active", button.dataset.filter === value);
+  });
+  renderProducts();
+};
 
-function drawFlipper(flipper, color) {
-  ctx.save();
-  ctx.translate(flipper.x, flipper.y);
-  ctx.rotate(flipper.active ? (flipper === flipperLeft ? -0.8 : 0.8) : flipper.angle);
-  ctx.fillStyle = color;
-  ctx.fillRect(-flipper.width / 2, -flipper.height / 2, flipper.width, flipper.height);
-  ctx.restore();
-}
-
-function loop() {
-  if (state.running) {
-    updateFlippers();
-    stepPhysics();
-  }
-  drawBoard();
-  requestAnimationFrame(loop);
-}
-
-function resetGame() {
-  state.score = 0;
-  state.balls = 3;
-  state.running = true;
-  hudEl.querySelector("p").textContent = "按空格发球，方向键或 A/D 控制挡板。";
-  updateScore(0);
-  updateBalls();
-  resetBall();
-}
-
-window.addEventListener("keydown", (event) => {
-  if (event.code === "ArrowLeft" || event.code === "KeyA") {
-    keyState.left = true;
-  }
-  if (event.code === "ArrowRight" || event.code === "KeyD") {
-    keyState.right = true;
-  }
-  if (event.code === "Space") {
-    launchBall();
-  }
+filterButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    setActiveFilter(button.dataset.filter);
+  });
 });
 
-window.addEventListener("keyup", (event) => {
-  if (event.code === "ArrowLeft" || event.code === "KeyA") {
-    keyState.left = false;
-  }
-  if (event.code === "ArrowRight" || event.code === "KeyD") {
-    keyState.right = false;
-  }
+productGrid.addEventListener("click", (event) => {
+  const target = event.target.closest("button[data-add]");
+  if (!target) return;
+  cartTotal += 1;
+  cartCount.textContent = cartTotal;
 });
 
-restartBtn.addEventListener("click", resetGame);
-canvas.addEventListener("click", launchBall);
+searchInput.addEventListener("input", renderProducts);
 
-resetGame();
-loop();
+const updateCountdown = () => {
+  const [hours, minutes, seconds] = countdown.textContent
+    .split(":")
+    .map(Number);
+  const totalSeconds = hours * 3600 + minutes * 60 + seconds - 1;
+  const safeSeconds = totalSeconds > 0 ? totalSeconds : 7200;
+  const nextHours = String(Math.floor(safeSeconds / 3600)).padStart(2, "0");
+  const nextMinutes = String(Math.floor((safeSeconds % 3600) / 60)).padStart(
+    2,
+    "0"
+  );
+  const nextSeconds = String(safeSeconds % 60).padStart(2, "0");
+  countdown.textContent = `${nextHours}:${nextMinutes}:${nextSeconds}`;
+};
+
+renderProducts();
+setInterval(updateCountdown, 1000);
