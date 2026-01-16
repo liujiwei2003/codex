@@ -3,31 +3,205 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>打弹珠小游戏</title>
+    <title>星河优选 - 购物商城</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <main class="page">
-      <header class="header">
-        <h1>打弹珠</h1>
-        <div class="scoreboard">
-          <div>分数 <span id="score">0</span></div>
-          <div>球数 <span id="balls">3</span></div>
+    <div class="page">
+      <header class="top-bar">
+        <div class="logo">
+          <span class="logo-badge">星河</span>
+          <div>
+            <strong>星河优选</strong>
+            <small>品质新消费</small>
+          </div>
+        </div>
+        <nav class="nav">
+          <a href="#home">首页</a>
+          <a href="#category">分类</a>
+          <a href="#flash">限时购</a>
+          <a href="#new">新品</a>
+          <a href="#api">接口</a>
+        </nav>
+        <div class="user-actions">
+          <button class="ghost">注册</button>
+          <button class="primary">登录</button>
+          <div class="cart">
+            <span>购物车</span>
+            <span id="cart-count" class="cart-count">0</span>
+          </div>
         </div>
       </header>
 
-      <section class="game-shell">
-        <canvas id="game" width="420" height="640" aria-label="打弹珠游戏"></canvas>
-        <div class="hud" id="hud">
-          <p>按空格发球，方向键或 A/D 控制挡板。</p>
-          <button id="restart" type="button">重新开始</button>
+      <section id="home" class="hero">
+        <div class="hero-text">
+          <p class="tag">官方商城 · 新人专享</p>
+          <h1>一站式精品购物，满足每一次心动</h1>
+          <p>
+            精选全球好物、品牌直供、极速配送。每日 10:00 开抢，抢到就是赚到。
+          </p>
+          <div class="hero-actions">
+            <button class="primary">立即选购</button>
+            <button class="outline">查看活动</button>
+          </div>
+          <div class="hero-stats">
+            <div>
+              <strong>1200+</strong>
+              <span>品牌入驻</span>
+            </div>
+            <div>
+              <strong>98%</strong>
+              <span>好评率</span>
+            </div>
+            <div>
+              <strong>48h</strong>
+              <span>极速送达</span>
+            </div>
+          </div>
+        </div>
+        <div class="hero-card">
+          <img
+            src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=640&q=80"
+            alt="精选手表"
+          />
+          <div class="hero-card-info">
+            <h3>智能穿戴专场</h3>
+            <p>爆款直降 50%，错过再等一年。</p>
+            <button class="primary">立即进入</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="category" class="section">
+        <div class="section-title">
+          <h2>热门分类</h2>
+          <p>精选分区，找到你需要的宝贝。</p>
+        </div>
+        <div class="category-grid">
+          <article class="category-card">
+            <img
+              src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=500&q=80"
+              alt="潮流服饰"
+            />
+            <div>
+              <h3>潮流服饰</h3>
+              <p>新季上架，舒适穿搭。</p>
+            </div>
+          </article>
+          <article class="category-card">
+            <img
+              src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=500&q=80"
+              alt="数码科技"
+            />
+            <div>
+              <h3>数码科技</h3>
+              <p>旗舰好物，性能拉满。</p>
+            </div>
+          </article>
+          <article class="category-card">
+            <img
+              src="https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=500&q=80"
+              alt="美妆护肤"
+            />
+            <div>
+              <h3>美妆护肤</h3>
+              <p>焕亮光彩，精致每一天。</p>
+            </div>
+          </article>
+          <article class="category-card">
+            <img
+              src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=500&q=80"
+              alt="生活家电"
+            />
+            <div>
+              <h3>生活家电</h3>
+              <p>智能家居，品质生活。</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section id="flash" class="section flash">
+        <div class="section-title">
+          <h2>限时秒杀</h2>
+          <p>今日 20:00 开抢 · 低至 3 折。</p>
+        </div>
+        <div class="flash-banner">
+          <div>
+            <h3>爆款清单</h3>
+            <p>抢购倒计时：<span id="countdown">02:45:18</span></p>
+          </div>
+          <button class="primary">查看清单</button>
+        </div>
+      </section>
+
+      <section id="new" class="section">
+        <div class="section-title">
+          <h2>新品推荐</h2>
+          <p>全场精选，新潮新品抢先入手。</p>
+        </div>
+        <div class="toolbar">
+          <input id="search" type="search" placeholder="搜索商品、品牌" />
+          <div class="filters">
+            <button class="chip active" data-filter="all">全部</button>
+            <button class="chip" data-filter="tech">数码</button>
+            <button class="chip" data-filter="beauty">美妆</button>
+            <button class="chip" data-filter="home">家居</button>
+            <button class="chip" data-filter="fashion">服饰</button>
+          </div>
+        </div>
+        <div id="product-grid" class="product-grid"></div>
+      </section>
+
+      <section id="api" class="section api">
+        <div class="section-title">
+          <h2>接口链接（前端展示）</h2>
+          <p>点击即可查看预设的接口路径，方便接入后端。</p>
+        </div>
+        <div class="api-grid">
+          <a class="api-card" href="/api/products" target="_blank" rel="noreferrer">
+            <span>GET</span>
+            <div>
+              <h4>/api/products</h4>
+              <p>商品列表接口</p>
+            </div>
+          </a>
+          <a class="api-card" href="/api/products/featured" target="_blank" rel="noreferrer">
+            <span>GET</span>
+            <div>
+              <h4>/api/products/featured</h4>
+              <p>精选推荐接口</p>
+            </div>
+          </a>
+          <a class="api-card" href="/api/orders" target="_blank" rel="noreferrer">
+            <span>POST</span>
+            <div>
+              <h4>/api/orders</h4>
+              <p>创建订单接口</p>
+            </div>
+          </a>
+          <a class="api-card" href="/api/cart" target="_blank" rel="noreferrer">
+            <span>PUT</span>
+            <div>
+              <h4>/api/cart</h4>
+              <p>购物车更新接口</p>
+            </div>
+          </a>
         </div>
       </section>
 
       <footer class="footer">
-        <p>控制：← → 或 A/D 控制挡板，空格发球。</p>
+        <div>
+          <strong>星河优选</strong>
+          <p>官方品质保障 · 30 天无忧退换 · 24 小时客服在线</p>
+        </div>
+        <div class="footer-links">
+          <a href="#">帮助中心</a>
+          <a href="#">售后政策</a>
+          <a href="#">招商合作</a>
+        </div>
       </footer>
-    </main>
+    </div>
 
     <script src="script.js"></script>
   </body>
